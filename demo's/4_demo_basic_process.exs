@@ -11,7 +11,7 @@ Enum.map([1, 2, 3, 4, 5], fn x -> query.("Query #{x}") end) # Results after ten 
 
 
 spawn(fn -> query.("Query 1") end) # Zien geen output want print in Thread
-spawn(fn -> IO.puts(query.("Query 1")) end) # Zien geen output want print in Thread
+spawn(fn -> IO.puts(query.("Query 1")) end)
 
 
 # Closure om data mee te geven
