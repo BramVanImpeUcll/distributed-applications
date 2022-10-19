@@ -76,7 +76,7 @@ end
 # start iex
 # execute:
 
-# c "demo_browsers_server_process.exs" (compiles and loads in the file, beats copy-pasting)
+# c "5_demo_browsers_server_process.exs" (compiles and loads in the file, beats copy-pasting)
 # pid = BrowserCounter.start()
 # BrowserCounter.request_browsers(pid)
 # BrowserCounter.add_browser_hit(pid, :firefox)
