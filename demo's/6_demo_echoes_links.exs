@@ -45,7 +45,7 @@ end
 
 # PART 1 - NO TRAPPING
 # Comment trapping line
-# c "demo_echoes_links.exs"
+# c "6_demo_echoes_links.exs"
 # pid_A = spawn(Echo , :init , [])
 
 # send(pid_A, {:update_next, self()})
@@ -72,7 +72,7 @@ end
 
 # PART 2 - TRAPPING
 # Uncomment trapping line
-# c "demo_echoes_links.exs"
+# c "6_demo_echoes_links.exs"
 # pid_A = spawn(Echo , :init , [])
 
 # send(pid_A, {:update_next, self()})

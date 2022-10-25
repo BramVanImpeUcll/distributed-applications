@@ -44,7 +44,7 @@ defmodule Echo do
 end
 
 
-# c "demo_echoes_monitors.exs"
+# c "6_demo_echoes_monitors.exs"
 # pid_A = spawn(Echo , :init , [])
 
 # send(pid_A, {:update_next, self()})

@@ -28,7 +28,7 @@ defmodule Echo do
   end
 end
 
-# iex.bat demo_echoes.exs OF iex.bat; c "demo_echoes.exs"
+# c "6_demo_echoes.exs"
 # pid_A = spawn(Echo , :loop , [])
 # pid_B = spawn(Echo , :loop , [])
 # pid_C = spawn(Echo , :loop , [])
