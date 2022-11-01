@@ -1,6 +1,6 @@
 # Assignment
 
-Thanks to the beautiful design of this work environment, the minimal work loss with accidents and the immediate replacement of employees, our boss has decided to expand his company. Now he wants dynamically add workers to the company.
+Thanks to the beautiful design of this work environment, the minimal work loss with accidents and the immediate replacement of employees, our boss has decided to expand his company. Now he wants to dynamically add workers to the company.
 
 Constraints:
 
