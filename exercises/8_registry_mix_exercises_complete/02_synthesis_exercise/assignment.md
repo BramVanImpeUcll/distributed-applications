@@ -2,26 +2,30 @@
 
 Time to make a full fledged application with processes. The context of this exercise is a server which has multiple instances (of e.g. a gamemap). Since too many players in a single instance will cause problems such as lag, too many players in hunting areas, and so on..., we'll make server instances dynamically.
 
-## Task 1 - the `GameServer` its interface
+## Task 0
+
+Create a new mix project. Make sure that you have an `Application` as entry-point.
+
+## Task 1 - The `GameServer` its interface
 
 First create a `ExerciseSolution.GameServer` process that will keep track of the instances. Sample usage with `iex -S mix` _(add --werl after iex if you're on windows)_ would be:
 
 ```elixir
-iex> ExerciseSolution.GameServer.add_instance InstanceA
+iex> ExerciseSolution.GameServer.add_instance(InstanceA)
 :ok
-iex> ExerciseSolution.GameServer.add_instance InstanceB
+iex> ExerciseSolution.GameServer.add_instance(InstanceB)
 :ok
-iex> ExerciseSolution.GameServer.add_instance InstanceC
+iex> ExerciseSolution.GameServer.add_instance(InstanceC)
 :ok
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{InstanceA => nil, InstanceB => nil,InstanceC => nil}
 ```
 
-The GameServer is a GenServer. When you start up the application, this GenServer should be started automatically and be name registered under its module name.
+The GameServer is a GenServer. When you start up the application, this GenServer should be started automatically under a root supervisor and be name registered under its module name.
 
 Verify that the server is started with `:observer.start` _(applications -> your project name)_, after which you can execute the above code.
 
-## Task 2 - the dynamic supervisor
+## Task 2 - The dynamic supervisor
 
 Right now we're only modifying our state in our GenServer. Let us go a step further and provide a DynamicSupervisor for our genserver to start children under.
 
@@ -40,7 +44,7 @@ First start the `DynamicSupervisor` and after that the `GameServer`. This is bec
 Verify this with `:observer` or:
 
 ```elixir
-iex> Process.whereis ExerciseSolution.InstanceSupervisor
+iex> Process.whereis(ExerciseSolution.InstanceSupervisor)
 #PID<0.159.0>
 ```
 
@@ -63,16 +67,16 @@ iex> ExerciseSolution.InstanceSupervisor.add_instance(name: InstanceB)
 
 Verify that your processes are started with `:observer.start`. You should see processes started under the `InstanceSupervisor`.
 
-## Task 4 - managing your instances
+## Task 4 - Managing your instances
 
 We're not going to add our instances manually to our `GameServer` and to our `InstanceSupervisor`. This should be done all at once.
 
 ```elixir
-iex> ExerciseSolution.GameServer.add_instance InstanceA
+iex> ExerciseSolution.GameServer.add_instance(InstanceA)
 :ok
-iex> Process.whereis InstanceA
+iex> Process.whereis(InstanceA)
 #PID<0.167.0>
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{InstanceA => nil}
 ```
 
@@ -81,9 +85,9 @@ Now we can see that our `GameInstance` process is created and it is put in the s
 In case of the error logging approach, you can expect something like:
 
 ```elixir
-iex> ExerciseSolution.GameServer.add_instance InstanceA
+iex> ExerciseSolution.GameServer.add_instance(InstanceA)
 :ok
-iex> ExerciseSolution.GameServer.add_instance InstanceA
+iex> ExerciseSolution.GameServer.add_instance(InstanceA)
 :ok
 iex>
 12:02:18.103 [warn]  Could not create instance because of {:already_started, #PID<0.246.0>}
@@ -91,22 +95,22 @@ iex>
 
 ## Task 5 - Connecting / assigning players
 
-While we have our instances and manager process started, they aren't doing a lot. Time to assign fictive players to instances. Since a player would be represented as another process (one with a TCP connection for example), we need to provide a PID as well.
+While we have our instances and manager process started, they aren't doing a lot. Time to assign fictive players to instances. Since a player would be represented as another process (one connected via TCP for example), we need to provide a PID as well.
 
 First of all, instances keep track of __which__ players are connected to their instance. So how do we assign a player to a `GameInstance`? In ideal situations it'd be based on some kind of smart algorithm. Though right now (as the `GameServer` doesn't know how many players are connected to each instance) we will just use the random strategy. Randomly assign a player to an instance.
 
 ```elixir
-iex> ExerciseSolution.GameServer.add_instance InstanceA
+iex> ExerciseSolution.GameServer.add_instance(InstanceA)
 :ok
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell", self())
 {:connected_to_instance, #PID<0.160.0>}
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell", self())
 {:error, :already_connected_client, #PID<0.158.0>, :to_instance, #PID<0.160.0>}
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell2", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell2", self())
 {:connected_to_instance, #PID<0.160.0>}
-iex> ExerciseSolution.GameServer.add_instance InstanceB
+iex> ExerciseSolution.GameServer.add_instance(InstanceB)
 :ok
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell4", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell4", self())
 {:connected_to_instance, #PID<0.185.0>}
 ```
 
@@ -129,33 +133,33 @@ Which one would you choose? The best approach, in this case, would be to let our
 
 _Keep in mind though, you should always assume `cast` messages can be lost in the process. Is that a problem in this case? Not really. It doesn't matter that much whether data is 10 seconds old, or it is 15 seconds old._
 
-Enough chit-chat. Let us implement it and execute some sample code:
+The `GameServer` then connects a new player to the `GameInstance` with the lowest load. Let us implement this (hint, see the Timer module) and execute some sample code:
 
 ```elixir
-iex> ExerciseSolution.GameServer.add_instance InstanceA
+iex> ExerciseSolution.GameServer.add_instance(InstanceA)
 :ok
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{InstanceA => %{pid: #PID<0.160.0>, players: 0}}
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell", self())
 {:connected_to_instance, #PID<0.160.0>}
-iex> :timer.sleep 10_000 # to illustrate that you should wait until the state is updated
+iex> :timer.sleep(10_000) # to illustrate that you should wait until the state is updated
 :ok
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{InstanceA => %{pid: #PID<0.160.0>, players: 1}}
-iex> ExerciseSolution.GameServer.add_instance InstanceB
+iex> ExerciseSolution.GameServer.add_instance(InstanceB)
 :ok
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{
   InstanceA => %{pid: #PID<0.160.0>, players: 1},
   InstanceB => %{pid: #PID<0.168.0>, players: 0}
 }
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell2", self()
-{:connected_to_instance, #PID<0.160.0>}
-# got connected to instance A... that's the downside of random strategy
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell3", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell2", self())
 {:connected_to_instance, #PID<0.168.0>}
-# Yes! Connected to instance B.
-iex> ExerciseSolution.GameServer.list_instances
+# Connected to instance B.
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell3", self())
+{:connected_to_instance, #PID<0.160.0>}
+# Connected to instance A.
+iex> ExerciseSolution.GameServer.list_instances()
 %{
   InstanceA => %{pid: #PID<0.160.0>, players: 2},
   InstanceB => %{pid: #PID<0.168.0>, players: 1}
@@ -164,18 +168,18 @@ iex> ExerciseSolution.GameServer.list_instances
 
 While there are still some kinks that should be ironed out, we now have a very simple game server. Well, at least the instance managing part at least.
 
-## Task 7 - algorithm based on N players in instance
+## Task 7 - Algorithm based on N players in instance
 
-Right now we're assigning players randomly over our instances. In a game context, users can log out, which means that the "random" algorithm won't be the best choice. If you provide the option that users can change instances themselves, this problem might even become worse over time. This task will let you implement another strategy to assign new connections.
+Right now we're assigning players over our instances based on periodic reports. If you provide the option that users can change instances themselves, load might become worse over time. This task will let you implement another strategy to assign new connections.
 
 The proposed algorithm assigns a player based on a weighted percentage. This percentage is calculated based on the current connected players to an instance. It is not necessary to do this perfectly, as we don't have real-time feed from our instances (regarding connected players). This would only cause a lot of messages that don't have a lot of added value anyway.
 
-Question to you: why do you think least first isn't a good choice as an algorithm?
+Question to you: why do you think the current least first approach isn't a good choice as an algorithm?
 
 <details><summary>Answer:</summary>
 <p>
 
-* We don't have a realtime feed, causing to "overload" an instance every 10 seconds
+* We don't have a realtime feed, causing to "overload" an instance during 10 seconds
 * Traffic, and thus also workload, isn't distributed evenly. Once instance is handling a lot of new players at once
 * This will result in another instance handling new connections roughly every 10 seconds. Thus mitigating the problem up until a certain point where there are similar-loaded instances. This isn't the case when a new instance shows up, as it will be the least connected server for longer than 10 seconds. This extremely loaded instance will thus be very busy, causing a delay to new players that want to log in.
 
@@ -206,20 +210,20 @@ While this might not be totally correct... it is just to give you an indication.
 You can test the above with following code (I've added some extra IO.inspect to show the above calculations):
 
 ```elixir
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{}
-iex> ExerciseSolution.GameServer.add_instance InstanceA
+iex> ExerciseSolution.GameServer.add_instance(InstanceA)
 :ok
-iex> ExerciseSolution.GameServer.add_instance InstanceB
+iex> ExerciseSolution.GameServer.add_instance(InstanceB)
 :ok
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 # When adding an instance, I quickly give a very high percentage to make sure
 #   it is selected first.
 %{
   InstanceA => %{percentage: 100, pid: #PID<0.148.0>, players: 0},
   InstanceB => %{percentage: 100, pid: #PID<0.151.0>, players: 0}
 }
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell1", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell1", self())
 # Here you can see that this results in a number between the sum of the below numbers.
 #   Normally this is a number between 1-100%, but instances that don't have any players
 #     will score very high.
@@ -227,25 +231,25 @@ Elixir.DATA: [{InstanceA, 10000}, {InstanceB, 10000}]
 Elixir.RANDOM_NUMBER: 2939
 Elixir.RESULT_INSTANCE: InstanceA
 {:connected_to_instance, #PID<0.148.0>}
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell2", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell2", self())
 # Note: Despite Instance A already having a connected player, the percentagage is extremely high.
 #  This is because the new players are connected within the 10 second window (and the GameServer isn't updated yet)
 Elixir.DATA: [{InstanceA, 10000}, {InstanceB, 10000}]
 Elixir.RANDOM_NUMBER: 9449
 Elixir.RESULT_INSTANCE: InstanceA
 {:connected_to_instance, #PID<0.148.0>}
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell3", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell3", self())
 Elixir.DATA: [{InstanceA, 1.0}, {InstanceB, 99.0}]
 Elixir.RANDOM_NUMBER: 12
 Elixir.RESULT_INSTANCE: InstanceB
 {:connected_to_instance, #PID<0.151.0>}
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell4", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell4", self())
 # Here you can see that the instances have reported back after they have some connections.
 Elixir.DATA: [{InstanceA, 33.0}, {InstanceB, 67.0}]
 Elixir.RANDOM_NUMBER: 65
 Elixir.RESULT_INSTANCE: InstanceB
 {:connected_to_instance, #PID<0.151.0>}
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{
   InstanceA => %{percentage: 0.5, pid: #PID<0.148.0>, players: 2},
   InstanceB => %{percentage: 0.5, pid: #PID<0.151.0>, players: 2}
@@ -271,20 +275,20 @@ Examples:
 
 There is most likely a better solution, but this is just a suggestion.
 
-## Task 8 - monitor instances & register when started
+## Task 8 - Monitor instances & register when started
 
 Now that we've got a very basic implemetation, we can happily say that it works. Well, at least when there are no crashes. We all know that instances crash for various reasons... Let us see how our current implementation handles this.
 
 First create some instances and add some players.
 
 ```elixir
-iex> ExerciseSolution.GameServer.add_instance InstanceA
+iex> ExerciseSolution.GameServer.add_instance(InstanceA)
 :ok
-iex> ExerciseSolution.GameServer.add_instance InstanceB
+iex> ExerciseSolution.GameServer.add_instance(InstanceB)
 :ok
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell1", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell1", self())
 {:connected_to_instance, #PID<0.148.0>}
-iex> ExerciseSolution.GameServer.assign_player_to_instance "iex_shell2", self()
+iex> ExerciseSolution.GameServer.assign_player_to_instance("iex_shell2", self())
 {:connected_to_instance, #PID<0.151.0>}
 ```
 
@@ -292,22 +296,22 @@ Next, open your `:observer` with `:observer.start` and kill all the started inst
 
 ### SubTask 8A. Monitoring instances
 
-So how do we resolve this problem? Well this will need 2 steps. First, we'll monitor our instances so that they are deleted from the state when something crashes. When this happens (and the messages arrives at our `GameServer`), we'll just delete that instance from our state. Let's not think about instances that aren't working and just focus on the good ones.
+So how do we resolve this problem? Well this will need 2 steps. First, we'll monitor our instances from the `GameServer` so that they are deleted from the state when something crashes. When this happens (and the messages arrives at our `GameServer`), we'll just delete that instance from our state. Let's not think about instances that aren't working and just focus on the good ones.
 
 _If you finish this task you can still receive errors when testing it manually. When a report message arrives, it'll still try to associate the PID with an instance. Don't worry, this doesn't have to work for now. Test manually that the instance is removed within the report window with `list_instances`._
 
-### SubTask 8B. instance registration
+### SubTask 8B. Instance registration
 
 Now we'll make it a bit more durable so that our `GameServer` doesn't crash all the time. When an instance starts, it'll have to register itself at the `GameServer`. This way, when an instance is (re)started, the `GameServer` has its updated PID.
 
 Verify this by doing te above steps again, though only this time the `GameServer` shouldn't crash and its state (instances with their associated PID's) should be updated automatically. When you execute `ExerciseSolution.GameServer.list_instances/0`, you should see updated PID's.
 
 ```elixir
-iex> ExerciseSolution.GameServer.add_instance IA
+iex> ExerciseSolution.GameServer.add_instance(IA)
 :ok
-iex> ExerciseSolution.GameServer.add_instance IB
+iex> ExerciseSolution.GameServer.add_instance(IB)
 :ok
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{
   IA => %{percentage: 100, pid: #PID<0.162.0>, players: 0},
   IB => %{percentage: 100, pid: #PID<0.164.0>, players: 0}
@@ -315,22 +319,22 @@ iex> ExerciseSolution.GameServer.list_instances
 iex> :observer.start
 :ok
 iex> # kill instance A in observer
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{
   IA => %{percentage: 100, pid: #PID<0.192.0>, players: 0},
   IB => %{percentage: 100, pid: #PID<0.164.0>, players: 0}
 }
 iex> # kill instance B in observer
-iex> ExerciseSolution.GameServer.list_instances
+iex> ExerciseSolution.GameServer.list_instances()
 %{
   IA => %{percentage: 100, pid: #PID<0.192.0>, players: 0},
   IB => %{percentage: 100, pid: #PID<0.201.0>, players: 0}
 }
 ```
 
-_Note: we're basically mixing a very basic `Registry` within our logic of our `GameServer`. This is thus not good design of our OTP application! We'll cover `Registry` later. This is a good exercise to understand why you need a `Registry` and how it kind of works (this is a naive implementation after all)._
+_Note: we're basically mixing a very basic `Registry` within the logic of our `GameServer`. This is not very good design of our OTP application! You can try with a `Registry` process later. This is a good exercise to understand why you need a `Registry` and how it kind of works (this is a naive implementation after all)._
 
-## Task 9 - replying late when assigning a player
+## Task 9 - Replying late when assigning a player
 
 Right now we're adding players one by one. Another problem might be that the calculation to decide upon the instance might be a little costly (depending on your implementation). The more time it requires to complete, the longer it'll take when a lot of players connect at the same time. This is something that we don't want, so we'll assign these players asynchronously.
 
@@ -375,6 +379,6 @@ Here we see that if the `Registry` logic would no longer be in our `GameServer`,
 
 ## Summary
 
-The above suggested solutions are not best practices. This is meant to give you an introduction into OTP applications and certain situations where monitoring and registering on start could be useful. A lot of the above could be optimized with e.g. a Registry implementation. Other topics, such as distribution, haven't been covered as well.
+The above suggested solutions are not best practices. This is meant to give you an introduction into OTP applications and certain situations where monitoring and registering on start could be useful. A lot of the above could be optimized with e.g. a Registry implementation. Other topics, such as distribution, haven't been covered yet.
 
 Solution code, just like this assignment, is meant for educational purposes.

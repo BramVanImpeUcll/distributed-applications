@@ -36,4 +36,4 @@ How can you start your application and execute code defined in the module in it?
 
 (Hint: see the --sup flag when running mix new)
 
-(Hint 2: see [this stack overflow post](https://stackoverflow.com/questions/30687781/how-to-run-an-elixir-application) for more pointers)
+(Hint 2: see [this stack overflow post](https://stackoverflow.com/questions/30687781/how-to-run-an-elixir-application) for more options)
