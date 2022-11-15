@@ -2,7 +2,7 @@ defmodule Demo.Part1.GeneralChatRoomV1 do
   use GenServer
   @me __MODULE__
 
-  defstruct messages: [], participants: %{}
+  defstruct messages: [], participants: %{} # https://elixir-lang.org/getting-started/structs.html
 
   # API
 
@@ -17,7 +17,7 @@ defmodule Demo.Part1.GeneralChatRoomV1 do
 
   @impl true
   def handle_call({:participate, _, pid}, _, %@me{} = state)
-      when is_map_key(state.participants, pid) do
+      when is_map_key(state.participants, pid) do # Match op Struct type and assign to variable
     {:reply, {:error, :already_participating}, state}
   end
 

@@ -27,3 +27,13 @@ Let your sage read your secret that you defined in a config. Do not hard code th
 iex> Exercise.Sage.spill_secret()
 :secret_defined_in_config
 ```
+
+See if your change works by running the tests.
+
+## Task 4
+
+How can you start your application and execute code defined in the module in it?
+
+(Hint: see the --sup flag when running mix new)
+
+(Hint 2: see [this stack overflow post](https://stackoverflow.com/questions/30687781/how-to-run-an-elixir-application) for more pointers)

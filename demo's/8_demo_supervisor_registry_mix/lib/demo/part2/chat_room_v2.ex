@@ -33,7 +33,7 @@ defmodule Demo.Part2.ChatRoomV2 do
   def handle_call({:participate, pid}, _, %@me{participants: ps} = state) do
     readable_name = retrieve_sender_name(pid)
 
-    with {:registered?, name} when not is_nil(name) <- {:registered?, readable_name},
+    with {:registered?, name} when not is_nil(name) <- {:registered?, readable_name}, # Elixir with statement: https://elixirschool.com/en/lessons/basics/control_structures#with-3
          {:participating?, false} <- {:participating?, name in ps} do
       new_state = %{state | participants: [name | state.participants]}
       {:reply, :ok, new_state}

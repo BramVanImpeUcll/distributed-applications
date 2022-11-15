@@ -4,7 +4,7 @@ Time to make a full fledged application with processes. The context of this exer
 
 ## Task 1 - the `GameServer` its interface
 
-First create a `ExerciseSolution.GameServer` process that will keep track of the instances. Sample usage with `iex -S mix run` _(add --werl after iex if you're on windows)_ would be:
+First create a `ExerciseSolution.GameServer` process that will keep track of the instances. Sample usage with `iex -S mix` _(add --werl after iex if you're on windows)_ would be:
 
 ```elixir
 iex> ExerciseSolution.GameServer.add_instance InstanceA
@@ -48,7 +48,7 @@ iex> Process.whereis ExerciseSolution.InstanceSupervisor
 
 Time to define what our instances can do. Create the `GameInstance` module (which is a GenServer). You should be able to add players to the instance and retrieve all the players.
 
-Also provide an interface to the `InstanceSupervisor` to easily add an instance. You need to provide the name of the instance. You'll pass this as a keyword list. Sample usage would be:
+Also provide a function to the `InstanceSupervisor` to easily add an instance. You need to provide the name of the instance. You'll pass this as a keyword list. Sample usage would be:
 
 ```elixir
 iex> ExerciseSolution.InstanceSupervisor.add_instance(name: InstanceA)
@@ -65,7 +65,7 @@ Verify that your processes are started with `:observer.start`. You should see pr
 
 ## Task 4 - managing your instances
 
-We're not going to add our instances manually to our `GameServer` and adding those instances. This should be done all at once.
+We're not going to add our instances manually to our `GameServer` and to our `InstanceSupervisor`. This should be done all at once.
 
 ```elixir
 iex> ExerciseSolution.GameServer.add_instance InstanceA
