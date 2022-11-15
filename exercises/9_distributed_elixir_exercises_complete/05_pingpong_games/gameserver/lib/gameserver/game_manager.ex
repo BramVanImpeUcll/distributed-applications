@@ -52,3 +52,9 @@ defmodule GameManager do
     end)
   end
 end
+
+  ##########
+  # HELPER #
+  ##########
+
+  

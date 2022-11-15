@@ -1,5 +1,4 @@
-# On node B
-defmodule MyBuilding do
+defmodule DaLibclusterTest.MyBuilding do
   use GenServer
 
   @d210 %{capacity: 50, projector: true}
@@ -10,7 +9,7 @@ defmodule MyBuilding do
 
   defstruct rooms: @default_rooms
 
-  def start(name, args \\ []), do: GenServer.start(__MODULE__, args, name: name)
+  def start_link(name, args \\ []), do: GenServer.start_link(__MODULE__, args, name: name)
   def init(args), do: {:ok, struct(__MODULE__, args)}
 
   def get_rooms_for_building(building) when is_atom(building),
@@ -25,16 +24,3 @@ defmodule MyBuilding do
   def handle_cast({:add_room, room, capacity}, %{rooms: rs} = s),
     do: {:noreply, %{s | rooms: [{room, %{capacity: capacity}} | rs]}}
 end
-
-MyBuilding.start(ProximusBlokD)
-
-# Now verify that your process is running on node B:
-Process.whereis(ProximusBlokD)
-
-########################### 3
-
-# On node A:
-# should return nil
-Process.whereis(ProximusBlokD)
-GenServer.call({ProximusBlokD, :"pong@LT2211617"}, :rooms_for_building)
-# You should see a map as a response.

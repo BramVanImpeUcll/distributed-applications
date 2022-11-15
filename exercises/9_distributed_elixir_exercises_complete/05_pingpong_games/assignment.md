@@ -1,6 +1,6 @@
 # Task
 
-Similar to the last exercise of the previous week, use libcluster with the gossip strategy to easily detect other nodes.
+Similar to the last exercise, use libcluster with the gossip strategy to easily detect other nodes.
 
 Make an application that creates "matches" for ping pong games. We're not going to focus on OTP best practices, but just make a simple application like so:
 
@@ -28,7 +28,7 @@ The goal is to have 2 "gameserver" nodes that each hold a similar amount of matc
 
 You should easily be able to horizontally scale your application.
 
-_Hint: You can register your genserver when starting it with start_link like so:_
+_Hint: You can register your genserver globally when starting it with start_link like so:_
 
 ```elixir
 GenServer.start_link(__MODULE__, :ok, name: {:via, :global, {Node.self(), __MODULE__}})
