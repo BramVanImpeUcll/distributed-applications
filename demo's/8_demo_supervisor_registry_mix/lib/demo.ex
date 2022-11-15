@@ -5,6 +5,7 @@ defmodule Demo do
   alias Demo.Part2.ChatRoomRegistry
   alias Demo.Part2.ChatRoomV2
 
+  @spec dump_all_registered_processes :: list
   def dump_all_registered_processes() do
     Registry.select(ChatRoomRegistry, [
       {{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}

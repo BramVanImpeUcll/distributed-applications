@@ -2,8 +2,6 @@ defmodule Demo.Part2.ChatroomsDynamicSupervisor do
   # Automatically defines child_spec/1
   use DynamicSupervisor
 
-  alias Demo.Part2.ChatRoomSupervisor
-
   def start_link(init_arg) do
     DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
@@ -14,6 +12,6 @@ defmodule Demo.Part2.ChatroomsDynamicSupervisor do
   end
 
   def start_chatroom(room_name) do
-    DynamicSupervisor.start_child(__MODULE__, {ChatRoomSupervisor, room_name: room_name})
+    DynamicSupervisor.start_child(__MODULE__, {Demo.Part2.ChatRoomV2, room_name})
   end
 end
