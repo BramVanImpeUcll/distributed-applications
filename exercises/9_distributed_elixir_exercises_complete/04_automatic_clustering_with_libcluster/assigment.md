@@ -1,6 +1,6 @@
 # Task
 
-Manually connecting your nodes is not something you can do in production. Hence there's a library that makes your life easier called libcluster. Here is a video that explains how it more or less works [here](https://www.youtube.com/watch?v=zQEgEnjuQsU). This is just an extra and not required for this exercise.
+Manually connecting your nodes is not something you can do in production. Hence there's a library that makes your life easier called libcluster. Here is a video that explains how it more or less works [here](https://www.youtube.com/watch?v=zQEgEnjuQsU). The information in the video is just an extra and not required for this exercise.
 
 First make an empty mix project (with an application level supervisor):
 
