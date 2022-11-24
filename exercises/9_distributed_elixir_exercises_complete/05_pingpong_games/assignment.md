@@ -1,6 +1,6 @@
 # Task
 
-Similar to the last exercise, use libcluster with the gossip strategy to easily detect other nodes.
+Similar to the last exercise, use libcluster with the gossip strategy (or Empd on Windows if necessary) to easily detect other nodes.
 
 Make an application that creates "matches" for ping pong games. We're not going to focus on OTP best practices, but just make a simple application like so:
 

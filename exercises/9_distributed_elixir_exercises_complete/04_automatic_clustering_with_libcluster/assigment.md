@@ -14,7 +14,8 @@ Goal: make the exercise "03-calling-remote-genserver" again, but this time provi
 
 * You have your application level supervisor (already generated).
 * Copy the `MyBuilding` module to your `lib` folder and refactor it to `DaLibclusterTest.Mybuilding`. Also refactor it so that it uses `start_link`, as we'll use it under a supervisor.
-* Configure your application level supervisor for libcluster. You can either use the Epmd strategy (manual node config) or the gossip strategy. We prefer the gossip strategy, copy the following code in your application level supervisor to configure libcluster with this strategy:
+* Configure your application level supervisor for libcluster. You can either use the Epmd strategy (manual node config) or the gossip strategy. The gossip strategy can have problems when your applications run on Windows, configure the Empd strategy in that case (check the libcluster docs).
+* Here is some example config for the the gossip strategy, copy the following code in your application level supervisor to configure libcluster with this strategy:
 
 ```elixir
 topologies = [
